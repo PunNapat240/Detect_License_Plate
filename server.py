@@ -25,7 +25,7 @@ def enhance_contrast(image):
 
 @app.route('/')
 def home():
-    return render_template("index.html", image_url="/static/uploads/latest.jpg")
+    return render_template("index.html", imageLatest_url="/static/uploads/latest.jpg", imageDetect_url="/static/uploads/detect.jpg")
 
 @app.route('/upload', methods=['POST'])
 def upload():
@@ -58,11 +58,51 @@ def upload():
         print(f"❌ Error: {str(e)}")
         return jsonify({"error": f"Failed to process image: {str(e)}"}), 500
 
+@app.route('/upload_test', methods=['POST'])
+def upload_test():
+    """ 📸 ฟังก์ชันสำหรับอัปโหลดภาพ JPG เพื่อตรวจสอบการตรวจจับป้ายทะเบียน """
+    try:
+        if 'file' not in request.files:
+            return jsonify({"error": "No file part"}), 400
+        
+        file = request.files['file']
+        if file.filename == '':
+            return jsonify({"error": "No selected file"}), 400
+        
+        # ตรวจสอบว่าเป็นไฟล์ JPG หรือไม่
+        if not file.filename.lower().endswith(('.jpg', '.jpeg')):
+            return jsonify({"error": "Only JPG files are allowed"}), 400
+
+        # 📥 อ่านภาพที่อัปโหลด
+        image_path = os.path.join(UPLOAD_FOLDER, file.filename)
+        file.save(image_path)
+        print(f"✅ อัปโหลดไฟล์สำเร็จ: {image_path}")
+
+        # 📷 โหลดภาพ
+        image = cv2.imread(image_path)
+        if image is None:
+            return jsonify({"error": "Failed to read image"}), 500
+
+        # 🎨 แปลงภาพเป็น Grayscale และปรับปรุงคุณภาพ
+        gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+        img_corrected = apply_gamma_correction(gray, gamma=1.5)
+        img_enhanced = enhance_contrast(img_corrected)
+
+        # 🔍 ตรวจจับป้ายทะเบียน
+        license_plate_text = detect_license_plate(img_enhanced)
+        print("เลขทะเบียนที่ตรวจจับได้:", license_plate_text)
+
+        return jsonify({"message": "Complete", "license_plate": license_plate_text}), 200
+
+    except Exception as e:
+        print(f"❌ Error: {str(e)}")
+        return jsonify({"error": f"Failed to process image: {str(e)}"}), 500
+
 def detect_license_plate(image):
     """ ตรวจจับป้ายทะเบียนจากภาพ Grayscale โดยใช้ Canny และ Tesseract """
     try:
         # ตรวจสอบว่าภาพมี 1 channel (Grayscale)
-        if len(image.shape) == 2:  # หมายความว่าเป็นภาพ grayscale แล้ว
+        if len(image.shape) == 2:
             gray = image
         else:
             gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
@@ -82,7 +122,7 @@ def detect_license_plate(image):
         for c in contours:
             peri = cv2.arcLength(c, True)
             approx = cv2.approxPolyDP(c, 0.018 * peri, True)
-            if len(approx) == 4:  # ถ้าเป็นสี่เหลี่ยม
+            if len(approx) == 4:
                 license_plate_contour = approx
                 break
 
@@ -102,7 +142,7 @@ def detect_license_plate(image):
         cropped = gray[topx:bottomx+1, topy:bottomy+1]
 
         # 🔹 OCR อ่านตัวอักษรจากป้ายทะเบียน
-        custom_config = r'--oem 3 --psm 6'  # psm 6 = คาดการณ์ข้อความสั้น
+        custom_config = r'--oem 3 --psm 6'
         text = pytesseract.image_to_string(cropped, lang='tha', config=custom_config)
 
         print("🚗 เลขทะเบียนที่ตรวจจับได้:", text.strip())
@@ -111,7 +151,6 @@ def detect_license_plate(image):
     except Exception as e:
         print(f"⚠️ ตรวจจับป้ายทะเบียนล้มเหลว: {str(e)}")
         return "ตรวจจับไม่สำเร็จ"
-
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
