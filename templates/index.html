@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ESP32-CAM Live View</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f4f4f4;
+        }
+        h2 {
+            margin-bottom: 10px;
+        }
+        img {
+            max-width: 90%;
+            max-height: 80vh;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
+        }
+    </style>
+</head>
+<body>
+    <h2>ภาพล่าสุดจาก ESP32-CAM</h2>
+    <img id="liveImage" src="{{ image_url }}" alt="Latest Image">
+
+    <script>
+        function refreshImage() {
+            var img = document.getElementById("liveImage");
+            img.src = "{{ image_url }}?t=" + new Date().getTime(); // ป้องกันแคช
+        }
+
+        // setInterval(refreshImage, 5000); // อัปเดตทุก 2 วินาที
+    </script>
+</body>
+</html>
