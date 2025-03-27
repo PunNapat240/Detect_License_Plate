@@ -37,5 +37,16 @@
 
         // setInterval(refreshImage, 5000); // อัปเดตทุก 2 วินาที
     </script>
+    <h2>Detect</h2>
+    <img id="DetectliveImage" src="{{ image_url }}" alt="Latest Image">
+
+    <script>
+        function refreshImage() {
+            var img = document.getElementById("DetectliveImage");
+            img.src = "{{ image_url }}?t=" + new Date().getTime(); // ป้องกันแคช
+        }
+
+        // setInterval(refreshImage, 5000); // อัปเดตทุก 2 วินาที
+    </script>
 </body>
 </html>
