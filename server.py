@@ -74,8 +74,8 @@ def upload_test():
             return jsonify({"error": "Only JPG files are allowed"}), 400
 
         # 📥 อ่านภาพที่อัปโหลด
-        image_path = os.path.join(UPLOAD_FOLDER, file.filename)
-        file.save(image_path)
+        image_path = os.path.join(UPLOAD_FOLDER, "latest.jpg")
+        Image.fromarray(img_enhanced, mode="L").save(image_path, "JPEG")
         print(f"✅ อัปโหลดไฟล์สำเร็จ: {image_path}")
 
         # 📷 โหลดภาพ
