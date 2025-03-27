@@ -1,0 +1,6 @@
+Flask==2.0.1
+opencv-python==4.5.3.56
+pytesseract==0.3.8
+Pillow==8.2.0
+numpy==1.21.2
+gunicorn
