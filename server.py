@@ -75,7 +75,7 @@ def upload_test():
 
         # 📥 อ่านภาพที่อัปโหลด
         image_path = os.path.join(UPLOAD_FOLDER, "latest.jpg")
-        Image.fromarray(img_enhanced, mode="L").save(image_path, "JPEG")
+        file.save(image_path)
         print(f"✅ อัปโหลดไฟล์สำเร็จ: {image_path}")
 
         # 📷 โหลดภาพ
