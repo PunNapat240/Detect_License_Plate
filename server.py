@@ -11,7 +11,7 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 # กำหนด path ของ Tesseract OCR (แก้ไขให้ตรงกับเครื่องของคุณ)
 # pytesseract.pytesseract.tesseract_cmd = r'C:/Program Files/Tesseract-OCR/tesseract.exe'
-pytesseract.pytesseract.tesseract_cmd = "/usr/bin/pytesseract"
+pytesseract.pytesseract.tesseract_cmd = "/usr/bin/tesseract"
 
 def apply_gamma_correction(image, gamma=1.5):
     """ ปรับค่า Gamma Correction เพื่อเพิ่มความคมชัดของภาพ """
@@ -21,7 +21,7 @@ def apply_gamma_correction(image, gamma=1.5):
 
 def enhance_contrast(image):
     """ เพิ่ม Contrast ของภาพโดยใช้ CLAHE (Contrast Limited Adaptive Histogram Equalization) """
-    clahe = cv2.createCLAHE(clipLimit=3.0, tileGridSize=(4, 4))
+    clahe = cv2.createCLAHE(clipLimit=3.0, tileGridSize=(8, 8))
     return clahe.apply(image)
 
 @app.route('/')
@@ -143,7 +143,7 @@ def detect_license_plate(image):
         cropped = gray[topx:bottomx+1, topy:bottomy+1]
 
         # 🔹 OCR อ่านตัวอักษรจากป้ายทะเบียน
-        custom_config = r'--oem 3 --psm 6 tessedit_char_whitelist=กขคฆงจฉชซฌญฎฏฐฑฒณดตถทธนบปผฝพฟภมยรลวศษสหฬอฮ0123456789'
+        custom_config = r'--oem 3 --psm 6 tessedit_char_whitelist=0123456789กขคฆงจฉชซฌญฎฏฐฑฒณดตถทธนบปผฝพฟภมยรลวศษสหฬอฮ'
         text = pytesseract.image_to_string(cropped, lang='tha', config=custom_config)
 
 
